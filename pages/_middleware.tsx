@@ -3,14 +3,15 @@ import { NextResponse } from 'next/server'
 
 export async function middleware(req: any) {
   const token = await getToken({ req, secret: process.env.JWT_SECRET! })
-  const { pathname } = req.nextUrl
+  const url = req.nextUrl.clone()
 
   //1) the token exists
-  if (pathname.includes('/api/auth') || token) {
+  if (url.pathname.includes('/api/auth') || token) {
     return NextResponse.next()
   }
 
-  if (!token && pathname !== '/login') {
-    return NextResponse.redirect('/login')
+  if (!token && url.pathname !== '/login') {
+    url.pathname = '/login'
+    return NextResponse.rewrite(url)
   }
 }
